@@ -49,13 +49,15 @@ a{3} = sigmoid( hypothesis )
 a{3}(1,:)
 
 % Calculate costs
-for ii = 1:m
-    J = J + ( -yMatrix(ii,:)*log(a{3}(ii,:))' - (1-yMatrix(ii,:))*log(1-a{3}(ii,:))' ) ;
-end
+% for ii = 1:m
+%     J = J + ( -yMatrix(ii,:)*log(a{3}(ii,:))' - (1-yMatrix(ii,:))*log(1-a{3}(ii,:))' ) ;
+% end
+J = sum(sum(-1*yMatrix.* log(a{3}) - (1-yMatrix).* log(1-a{3})));
 J = 1/m * J;
 
 % Regularized cost function
-J = j + lambda/(2*m)*
+regTerm = sum(sum(Theta1.*Theta1)) + sum(sum(Theta2.*Theta2));
+J = J + lambda/(2*m)*regTerm;
 
 % Part 2: Implement the backpropagation algorithm to compute the gradients
 %         Theta1_grad and Theta2_grad. You should return the partial derivatives of
@@ -69,7 +71,22 @@ J = j + lambda/(2*m)*
 %         Hint: We recommend implementing backpropagation using a for-loop
 %               over the training examples if you are implementing it for the 
 %               first time.
-
+for t = 1:m
+    % 1. Input layer
+    a1 = [1;X(t,:)'];
+    % Hidden layers
+    z2 = Theta1*a1;
+    a2 = [1;sigmoid(z2)];
+    z3 = Theta2*a2;
+    a3 = sigmoid(z3);
+    % 2.&3. Delta values (no d1 because no error is associated with the input)
+    d3 = a3 - yMatrix(t);
+    d2 = (Theta2' * d3).*[1;sigmoidGradient(z2)];
+    d2 = d2(2:end);
+    % 4. Gradient accumulation, capital delta
+    big
+    
+end
 %
 % Part 3: Implement regularization with the cost function and gradients.
 %
