@@ -1,4 +1,4 @@
-function [J grad] = nnCostFunction(nn_params, ...
+function [J, grad] = nnCostFunction(nn_params, ...
                                    input_layer_size, ...
                                    hidden_layer_size, ...
                                    num_labels, ...
@@ -39,14 +39,11 @@ yMatrix = eye_matrix(y,:);
 m = size(X, 1);
 a = cell(1,3);
 a{1} = [ones(m,1) ,X];
-hypothesis = a{1}*Theta1';
-size(hypothesis);
-a{2} = sigmoid( hypothesis );
+hypothesis1 = a{1}*Theta1';
+a{2} = sigmoid( hypothesis1 );
 a{2} = [ ones(size(a{2},1),1) , a{2} ];
-hypothesis = a{2}*Theta2';
-hypothesis(1,:);
-a{3} = sigmoid( hypothesis );
-a{3}(1,:);
+hypothesis2 = a{2}*Theta2';
+a{3} = sigmoid( hypothesis2 );
 
 % Calculate costs
 % for ii = 1:m
@@ -56,7 +53,7 @@ J = sum(sum(-1*yMatrix.* log(a{3}) - (1-yMatrix).* log(1-a{3})));
 J = 1/m * J;
 
 % Regularized cost function
-regTerm = sum(sum(Theta1.*Theta1)) + sum(sum(Theta2.*Theta2));
+regTerm = sum(sum(Theta1(:,2:end).*Theta1(:,2:end))) + sum(sum(Theta2(:,2:end).*Theta2(:,2:end)));
 J = J + lambda/(2*m)*regTerm;
 
 % Part 2: Implement the backpropagation algorithm to compute the gradients
@@ -80,24 +77,23 @@ for t = 1:m
     z3 = Theta2*a2;
     a3 = sigmoid(z3);
     % 2.&3. Delta values (no d1 because no error is associated with the input)
-    yy = ([1:num_labels]==y(t))';
-	% For the delta values:
-	d3 = a3 - yy;
-%     d3 = a3 - yMatrix(t);
+% 	yy = ([1:num_labels]==y(t))';
+%   d3 = a3 - yy;
+    d3 = a3 - yMatrix(t,:)';
     d2 = (Theta2' * d3).*[1;sigmoidGradient(z2)];
     d2 = d2(2:end);
     % 4. Gradient accumulation, capital delta
     Theta1_grad = Theta1_grad + d2*a1';
     Theta2_grad = Theta2_grad + d3*a2';    
 end
-% Theta1_grad = 1/m *Theta1_grad;
-% Theta2_grad = 1/m *Theta2_grad;
-% % Regularization
-% Theta1_grad(:,2:end) = Theta1_grad(:,2:end) + lambda/m * Theta1(:,2:end);
-% Theta2_grad(:,2:end) = Theta2_grad(:,2:end) + lambda/m * Theta2(:,2:end);
+Theta1_grad = 1/m *Theta1_grad;
+Theta2_grad = 1/m *Theta2_grad;
+% Regularization
+Theta1_grad(:,2:end) = Theta1_grad(:,2:end) + lambda/m * Theta1(:,2:end);
+Theta2_grad(:,2:end) = Theta2_grad(:,2:end) + lambda/m * Theta2(:,2:end);
 
-Theta1_grad = (1/m) * Theta1_grad + (lambda/m) * [zeros(size(Theta1, 1), 1) Theta1(:,2:end)];
-Theta2_grad = (1/m) * Theta2_grad + (lambda/m) * [zeros(size(Theta2, 1), 1) Theta2(:,2:end)];
+% Theta1_grad = (1/m) * Theta1_grad + (lambda/m) * [zeros(size(Theta1, 1), 1) Theta1(:,2:end)];
+% Theta2_grad = (1/m) * Theta2_grad + (lambda/m) * [zeros(size(Theta2, 1), 1) Theta2(:,2:end)];
 
 % Part 3: Implement regularization with the cost function and gradients.
 %
