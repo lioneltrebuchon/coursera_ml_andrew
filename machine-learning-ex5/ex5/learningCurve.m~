@@ -24,13 +24,8 @@ error_val   = zeros(m, 1);
 % ====================== YOUR CODE HERE ======================
 for i = 1:m 
     Xset    = X(1:i,:);
-    yset    = y(1:i);
+    yset    = y(1:i,:);
     
-    theta   = trainLinearReg(Xset,yset,lambda);
-    
-    lambdaError     = 0;
-    error_train(i)  = linearRegCostFunction(Xset,yset,theta,lambdaError);
-    error_val(i)    = linearRegCostFunction(Xval,yval,theta,lambdaError);
 end
 
 % Instructions: Fill in this function to return training errors in 
